@@ -5,77 +5,123 @@
 [![PennyLane](https://img.shields.io/badge/PennyLane-QML-yellow.svg)](https://pennylane.ai/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-**QuBridge** is an experimental machine learning pipeline that fuses traditional deep learning with quantum computing. By leveraging PyTorch for classical feature extraction and PennyLane for Parameterized Quantum Circuits (PQCs), this project demonstrates how to build and train hybrid neural networks for advanced pattern recognition.
+QuBridge is a reference implementation of a hybrid classical-quantum learning pipeline.
+It combines a classical PyTorch feature extractor with a PennyLane-powered parameterized quantum circuit (PQC)
+for end-to-end differentiable classification.
 
----
+## Features
 
-## 📖 The Concept
+- Hybrid PyTorch + PennyLane model (`QuBridgeModel`).
+- JSON/YAML config-driven training (`TrainConfig`).
+- Structured epoch logging and optional TensorBoard metrics.
+- Checkpoint save/load utilities.
+- Synthetic and real dataset pipelines (sklearn breast cancer).
+- CI, lint/type tooling, contribution templates, and security policy.
 
-As classical deep learning models approach their computational limits, Quantum Machine Learning (QML) offers a new frontier. QuBridge does not rely entirely on a quantum computer. Instead, it uses a highly efficient hybrid architecture:
+## Project Structure
 
-1.  **Classical Feature Extraction:** A traditional PyTorch neural network ingests complex data and compresses it into a refined feature vector.
-2.  **Quantum Classification:** These extracted features are embedded into a quantum state using a Parameterized Quantum Circuit (PQC), which acts as the final highly-dimensional classifier.
+```text
+qubridge/
+├── qubridge/
+│   ├── data/
+│   │   ├── real.py
+│   │   └── synthetic.py
+│   ├── models/
+│   │   ├── classical.py
+│   │   ├── hybrid_net.py
+│   │   └── quantum_layer.py
+│   └── train.py
+├── scripts/
+│   ├── predict.py
+│   ├── train_breast_cancer.py
+│   └── train_synthetic.py
+├── examples/
+│   ├── basic_forward.py
+│   ├── train_binary_classification.py
+│   └── train_breast_cancer.py
+├── tests/
+├── configs/
+│   ├── train_breast_cancer.yaml
+│   ├── train_synthetic.json
+│   └── train_synthetic.yaml
+├── docs/
+│   └── PERFORMANCE.md
+├── .github/
+│   ├── workflows/ci.yml
+│   ├── ISSUE_TEMPLATE/
+│   └── PULL_REQUEST_TEMPLATE.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── pyproject.toml
+├── requirements.txt
+└── requirements-dev.txt
+```
 
-
-
-## 🚀 Key Features
-
-* **Seamless Integration:** Treats quantum circuits as standard PyTorch layers.
-* **Quantum Data Embedding:** Implements efficient angle and amplitude embedding to translate classical bits into quantum qubits.
-* **Parameter-Shift Training:** Utilizes the parameter-shift rule to calculate precise gradients for the quantum circuit without collapsing the quantum state during backpropagation.
-
-
-
-## 🛠️ Tech Stack
-
-* **Python:** Core orchestration and logic.
-* **PyTorch:** Classical neural network layers, loss functions, and optimization.
-* **PennyLane:** Quantum circuit construction, data embedding, and QNode integration.
-
-## 📦 Installation
-
-Clone the repository and install the required dependencies:
+## Installation
 
 ```bash
-git clone [https://github.com/makalin/qubridge.git](https://github.com/makalin/qubridge.git)
+git clone https://github.com/makalin/qubridge.git
 cd qubridge
-pip install -r requirements.txt
-
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+# dev setup: pip install -r requirements-dev.txt
 ```
 
-## 💻 Quick Start
+## Quick Start
 
-Here is a basic example of how to initialize and run the hybrid model:
+### Basic forward pass
 
-```python
-import torch
-import pennylane as qml
-from models.hybrid_net import QuBridgeModel
-
-# Initialize the hybrid model (e.g., 4 classical features out, 4 qubits)
-model = QuBridgeModel(n_qubits=4)
-
-# Dummy input data (e.g., a batch of 10 images flattened)
-input_data = torch.randn(10, 256) 
-
-# Forward pass through classical PyTorch layers into the Quantum Circuit
-predictions = model(input_data)
-
-print(predictions)
-
+```bash
+python examples/basic_forward.py
 ```
 
-## 🧠 Architecture Deep Dive
+### Train on synthetic moons
 
-For a detailed breakdown of the math, the data embedding techniques, and how the gradients are calculated across the classical-quantum boundary, please read our technical essay: [The Quantum Leap in AI: Building Hybrid Classical-Quantum Neural Networks](https://www.google.com/search?q=link-to-your-essay-here).
+```bash
+python scripts/train_synthetic.py --config configs/train_synthetic.yaml
+```
 
-## 👨‍💻 Author
+### Train on real dataset (breast cancer)
 
-**Mehmet T. AKALIN**
+```bash
+python scripts/train_breast_cancer.py --config configs/train_breast_cancer.yaml
+```
 
-* GitHub: [@makalin](https://github.com/makalin)
-* Company: [Digital Vision](https://dv.com.tr)
+### Enable TensorBoard
 
-## 📄 License
+```bash
+python scripts/train_synthetic.py --config configs/train_synthetic.json --tensorboard-dir logs/tensorboard
+tensorboard --logdir logs/tensorboard
+```
 
-This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
+### Inference from a saved checkpoint
+
+```bash
+python scripts/predict.py --checkpoint checkpoints/qubridge_breast_cancer.pt --features "0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0"
+```
+
+## Quality and CI
+
+```bash
+ruff check .
+ruff format .
+mypy qubridge
+pytest
+```
+
+GitHub Actions runs lint, mypy, and tests on Python 3.10 and 3.11.
+
+## Documentation and Policies
+
+- Performance guidance: [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
+- Contribution process: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security reporting: [SECURITY.md](SECURITY.md)
+
+## Architecture Deep Dive
+
+[The Quantum Leap in AI: Building Hybrid Classical-Quantum Neural Networks](https://medium.com/@makalin/the-quantum-leap-in-ai-building-hybrid-classical-quantum-neural-networks-324dacce5c83)
+
+## License
+
+MIT License. See [LICENSE](LICENSE).

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qubridge"
+version = "0.1.0"
+description = "Hybrid classical-quantum neural network reference implementation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Mehmet T. Akalin" }
+]
+dependencies = [
+  "torch>=2.0",
+  "pennylane>=0.35",
+  "numpy>=1.24",
+  "scikit-learn>=1.3",
+  "tqdm>=4.66",
+  "PyYAML>=6.0",
+  "tensorboard>=2.14"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "ruff>=0.9.0",
+  "mypy>=1.11",
+  "pre-commit>=3.7",
+  "types-PyYAML>=6.0"
+]
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["qubridge*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
